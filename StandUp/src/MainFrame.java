@@ -62,7 +62,7 @@ public class MainFrame extends JFrame implements ActionListener {
 	JLabel2D lblMoney1;
 	JLabel2D lblMoney2;
 	JPanel panelMenu;
-	JButton btnCall, btnDie, btnPlus, btnExit;
+	JButton btnCall, btnDie, btnPlus, btnExit, btnReady;
 	JTextField txtPlus;
 	JPanel panelTitle;
 
@@ -336,7 +336,7 @@ public class MainFrame extends JFrame implements ActionListener {
 								y = (int) b.y;
 							}
 
-							out.println("/mouse " + x + " " + y);
+							//out.println("/mouse " + x + " " + y);
 						} catch (Exception e) {
 
 						}
