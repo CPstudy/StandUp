@@ -22,7 +22,7 @@ public class Login extends JFrame implements ActionListener {
 	JTextField txtPW;
 	JButton btnLogin;
 	JPanel panelLogin;
-	
+	JImageView imgTitle;
 	
 	public Login() {
 		setLayout(null);
@@ -35,7 +35,7 @@ public class Login extends JFrame implements ActionListener {
 		panelLogin.setBounds(45, 350, 330, 150);
 		add(panelLogin);
 
-		JLabel imgTitle = new JLabel(new ImageIcon(getClass().getResource("img/swing_title.png")));
+		imgTitle = new JImageView("img/swing_title.png");
 		imgTitle.setBounds(0, 30, 454, 294);
 		add(imgTitle);
 

@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -35,6 +36,9 @@ public class MainFrame extends JFrame implements ActionListener {
 	String sendData; // 전송 데이터
 	String receiveData; // 수신 데이터
 
+	ArrayList<Members> players = new ArrayList<>();
+	ArrayList<Integer> listIndex = new ArrayList<>();
+
 	String userID; // ID(대화명)
 	String playerID; // 상대방 ID
 
@@ -42,13 +46,16 @@ public class MainFrame extends JFrame implements ActionListener {
 	int lose = 0;
 	int betting = 0;
 	int total = 0;
+	int myIndex = 0;
 
 	ClientReceiveThread rcvThread;
 	boolean endFlag = false;
+	boolean ready = false;
+	boolean boolCard = false;
 
 	Jokbo jokbo;
-	
-	PlayerPanel pPanel1, pPanel2, pPanel3, pPanel4;
+
+	PlayerPanel[] playerPanel = new PlayerPanel[5];
 
 	JImageView imgBG, imgCursor, imgBGJokbo;
 	JLabel lblTitle;
@@ -73,7 +80,12 @@ public class MainFrame extends JFrame implements ActionListener {
 			"img/card6_1.png", "img/card6_2.png", "img/card7_1.png", "img/card7_2.png", "img/card8_1.png",
 			"img/card8_2.png", "img/card9_1.png", "img/card9_2.png", "img/card10_1.png", "img/card10_2.png" };
 
-	int[] cards = new int[4];
+	String[] names;
+	String[] indexes;
+	int[] newIndexes = { 0, 1, 2, 3, 4 };
+
+	int[] cards;
+	String[] cardArray;
 	int cardType = 0;
 	int scoreUser = 0;
 	int scorePlayer = 0;
@@ -97,7 +109,7 @@ public class MainFrame extends JFrame implements ActionListener {
 		getContentPane().setBackground(new Color(11, 121, 3, 0));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
-		
+
 		Font bigFont = new Font("궁서체", Font.BOLD, 12);
 
 		imgCursor = new JImageView("img/cursor2.png");
@@ -126,22 +138,31 @@ public class MainFrame extends JFrame implements ActionListener {
 		lblTitle.setBounds(FRAME_MARGIN + 6, (30 / 2) - 16, 50, 30);
 		lblTitle.setFont(new Font("맑은 고딕", Font.BOLD, 12));
 		panelTitle.add(lblTitle);
-		
-		pPanel1 = new PlayerPanel();
-		pPanel1.setBounds(40, 40, 240, 165);
-		add(pPanel1);
-		
-		pPanel2 = new PlayerPanel();
-		pPanel2.setBounds(pPanel1.getX(), pPanel1.getY() + 155, 240, 165);
-		add(pPanel2);
-		
-		pPanel3 = new PlayerPanel();
-		pPanel3.setBounds(480, pPanel1.getY(), 240, 165);
-		add(pPanel3);
-		
-		pPanel4 = new PlayerPanel();
-		pPanel4.setBounds(pPanel3.getX(), pPanel2.getY(), 240, 165);
-		add(pPanel4);
+
+		playerPanel[0] = new PlayerPanel();
+		playerPanel[0].setBounds(40, 40, 240, 165);
+		playerPanel[0].setName("사용자 1");
+		add(playerPanel[0]);
+
+		playerPanel[1] = new PlayerPanel();
+		playerPanel[1].setBounds(playerPanel[0].getX(), playerPanel[0].getY() + 155, 240, 165);
+		playerPanel[0].setName("사용자 2");
+		add(playerPanel[1]);
+
+		playerPanel[2] = new PlayerPanel();
+		playerPanel[2].setBounds(230, 350, 240, 165);
+		playerPanel[0].setName("사용자 3");
+		add(playerPanel[2]);
+
+		playerPanel[4] = new PlayerPanel();
+		playerPanel[4].setBounds(480, playerPanel[0].getY(), 240, 165);
+		playerPanel[0].setName("사용자 5");
+		add(playerPanel[4]);
+
+		playerPanel[3] = new PlayerPanel();
+		playerPanel[3].setBounds(playerPanel[4].getX(), playerPanel[1].getY(), 240, 165);
+		playerPanel[0].setName("사용자 4");
+		add(playerPanel[3]);
 
 		imgCard1 = new JImageView("img/back.png");
 		imgCard1.setBounds(160, 40, CARD_WIDTH, CARD_HEIGHT);
@@ -161,10 +182,12 @@ public class MainFrame extends JFrame implements ActionListener {
 
 		imgCard3 = new JImageView("img/back.png");
 		imgCard3.setBounds(imgCard1.getX(), 340, CARD_WIDTH, CARD_HEIGHT);
+		imgCard3.setVisible(false);
 		add(imgCard3);
 
 		imgCard4 = new JImageView("img/back.png");
 		imgCard4.setBounds(imgCard1.getX() + CARD_WIDTH + CARD_MARGIN, imgCard3.getY(), CARD_WIDTH, CARD_HEIGHT);
+		imgCard4.setVisible(false);
 		add(imgCard4);
 
 		lblJokbo2 = new JLabel2D("족보");
@@ -172,7 +195,7 @@ public class MainFrame extends JFrame implements ActionListener {
 				imgCard4.getY() + CARD_HEIGHT - 30, 50, 30);
 		lblJokbo2.setFont(new Font("궁서체", Font.BOLD, 16));
 		add(lblJokbo2);
-		
+
 		imgBGJokbo = new JImageView("img/bg_jokbo.png");
 		imgBGJokbo.setAutoScale(true);
 		imgBGJokbo.setBounds(imgCard4.getX() + CARD_WIDTH + 40, imgCard3.getY() + 30, 110, 320);
@@ -183,13 +206,13 @@ public class MainFrame extends JFrame implements ActionListener {
 		panelMenu.setBounds(WIDTH - 147, 30, 130, HEIGHT - 40);
 		add(panelMenu);
 
-		btnCall = new JButton("콜");
+		btnCall = new JButton("준비");
 		btnCall.setBounds(0, 10, 130, 50);
 		btnCall.setFont(new Font("궁서체", Font.BOLD, 16));
 		btnCall.addActionListener(this);
 		btnCall.setBackground(new Color(255, 187, 0));
 		btnCall.setUI(new StyleButtonUI());
-		btnCall.setEnabled(false);
+		btnCall.setEnabled(true);
 		panelMenu.add(btnCall);
 
 		btnDie = new JButton("다이");
@@ -274,12 +297,12 @@ public class MainFrame extends JFrame implements ActionListener {
 			}
 		});
 		thread.start();
-		
+
 		setVisible(true);
 	}
-	
-	public void set2DFont(JLabel2D...jLabel2Ds) {
-		for(JLabel2D label : jLabel2Ds) {
+
+	public void set2DFont(JLabel2D... jLabel2Ds) {
+		for (JLabel2D label : jLabel2Ds) {
 			label.setForeground(Color.white);
 			label.setOutlineColor(Color.black);
 			label.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
@@ -316,7 +339,7 @@ public class MainFrame extends JFrame implements ActionListener {
 			out.flush();
 
 			// 클라이언트 스레드 생성
-			rcvThread = new ClientReceiveThread(socket, in);
+			rcvThread = new ClientReceiveThread(socket, in, userID);
 			Thread thread = new Thread(rcvThread);
 			thread.start();
 
@@ -336,7 +359,7 @@ public class MainFrame extends JFrame implements ActionListener {
 								y = (int) b.y;
 							}
 
-							//out.println("/mouse " + x + " " + y);
+							// out.println("/mouse " + x + " " + y);
 						} catch (Exception e) {
 
 						}
@@ -375,86 +398,126 @@ public class MainFrame extends JFrame implements ActionListener {
 						}
 
 						if (rcvThread.playFlag) {
-							if (rcvThread.getPlayer().split(" ")[0].equals(userID)) {
-								playerID = rcvThread.getPlayer().split(" ")[1];
-								cardType = 0;
+							if (rcvThread.nextPlayer.equals(userID)) {
+								if (rcvThread.buttonFlag) {
+									btnCall.setEnabled(true);
+									btnDie.setEnabled(true);
+									txtPlus.setEnabled(true);
+									btnPlus.setEnabled(true);
+								}
 							} else {
-								playerID = rcvThread.getPlayer().split(" ")[0];
-								cardType = 1;
+								btnCall.setEnabled(false);
+								btnDie.setEnabled(false);
+								txtPlus.setEnabled(false);
+								btnPlus.setEnabled(false);
+							}
+						} else {
+							if(rcvThread.readyFlag) {
+								btnCall.setText("콜");
+								btnCall.setEnabled(false);
+								btnDie.setEnabled(false);
+								txtPlus.setEnabled(false);
+								btnPlus.setEnabled(false);
+							}
+							try {
+								names = rcvThread.names;
+								indexes = rcvThread.indexes;
+								myIndex = rcvThread.myIndex;
+
+								if (myIndex == 1) {
+									newIndexes[0] = 2;
+									newIndexes[1] = 3;
+									newIndexes[2] = 4;
+									newIndexes[3] = 0;
+									newIndexes[4] = 1;
+								} else if (myIndex == 2) {
+									newIndexes[0] = 1;
+									newIndexes[1] = 2;
+									newIndexes[2] = 3;
+									newIndexes[3] = 4;
+									newIndexes[4] = 0;
+								} else if (myIndex == 3) {
+									newIndexes[0] = 0;
+									newIndexes[1] = 1;
+									newIndexes[2] = 2;
+									newIndexes[3] = 3;
+									newIndexes[4] = 4;
+								} else if (myIndex == 4) {
+									newIndexes[0] = 0;
+									newIndexes[1] = 1;
+									newIndexes[2] = 2;
+									newIndexes[3] = 3;
+									newIndexes[4] = 4;
+								} else {
+									newIndexes[0] = 4;
+									newIndexes[1] = 0;
+									newIndexes[2] = 1;
+									newIndexes[3] = 2;
+									newIndexes[4] = 3;
+								}
+
+								for (int i = 0; i < indexes.length; i++) {
+									int dex = Integer.parseInt(indexes[i]) - 1;
+									playerPanel[newIndexes[dex]].setName(names[i]);
+
+								}
+
+							} catch (Exception e) {
+
 							}
 						}
 
-						if (rcvThread.card()) {
-							cards[0] = Integer.parseInt(rcvThread.cardString().split(" ")[1]);
-							cards[1] = Integer.parseInt(rcvThread.cardString().split(" ")[2]);
-							cards[2] = Integer.parseInt(rcvThread.cardString().split(" ")[3]);
-							cards[3] = Integer.parseInt(rcvThread.cardString().split(" ")[4]);
+						if (rcvThread.card() && !boolCard) {
+							boolCard = true;
+							System.out.println("card string = " + rcvThread.cardString());
+							/*
+							 * for(int i = 0; i < cards.length; i++) { cards[i] =
+							 * Integer.parseInt(rcvThread.cardString().split(" ")[i + 1]); }
+							 */
 
-							if (cardType == 0) {
-								if (userID.equals("admin")) {
-									pPanel1.setCard(cardSet[cards[2]], cardSet[cards[3]]);
-									lblJokbo1.setText(jokbo.getJokboText(cards[2], cards[3]));
-								}
-								imgCard3.setImage(cardSet[cards[0]]);
-								imgCard4.setImage(cardSet[cards[1]]);
-								scoreUser = jokbo.getJokbo(cards[0], cards[1]);
-								scorePlayer = jokbo.getJokbo(cards[2], cards[3]);
-								lblJokbo2.setText(jokbo.getJokboText(cards[0], cards[1]));
-								turn = 1;
+							cardArray = rcvThread.cards;
+							cards = new int[cardArray.length];
 
-								if (scoreUser > scorePlayer) {
-									lose = 2;
-								} else if (scoreUser < scorePlayer) {
-									lose = 1;
-								} else {
-									lose = 0;
-								}
-
-								if (scoreUser == 114) {
-									if (scorePlayer >= 10000 && scorePlayer <= 90000) {
-										lose = 2;
-									} else if (scoreUser >= 10000 && scoreUser <= 90000) {
-										lose = 1;
-									}
-								}
-
-							} else {
-								if (userID.equals("admin")) {
-									pPanel1.setCard(cardSet[cards[0]], cardSet[cards[1]]);
-									lblJokbo1.setText(jokbo.getJokboText(cards[0], cards[1]));
-								}
-								imgCard3.setImage(cardSet[cards[2]]);
-								imgCard4.setImage(cardSet[cards[3]]);
-								scoreUser = jokbo.getJokbo(cards[2], cards[3]);
-								scorePlayer = jokbo.getJokbo(cards[0], cards[1]);
-								lblJokbo2.setText(jokbo.getJokboText(cards[2], cards[3]));
-								turn = 2;
-
-								if (scoreUser > scorePlayer) {
-									lose = 1;
-								} else if (scoreUser < scorePlayer) {
-									lose = 2;
-								} else {
-									lose = 0;
-								}
-
-								if (scoreUser == 114) {
-									if (scorePlayer >= 10000 && scorePlayer <= 90000) {
-										lose = 1;
-									} else if (scoreUser >= 10000 && scoreUser <= 90000) {
-										lose = 2;
-									}
-								}
-
+							for (int i = 0; i < cardArray.length; i++) {
+								cards[i] = Integer.parseInt(cardArray[i]);
 							}
 
-							if (scoreUser == 111 || scoreUser == 112 || scorePlayer == 111 || scorePlayer == 112) {
+							for (int i = 0; i < indexes.length; i++) {
+								int dex = Integer.parseInt(indexes[i]) - 1;
+								playerPanel[newIndexes[dex]].setName(names[i]);
+								playerPanel[newIndexes[dex]].setCard1(cardSet[cards[2 * i]]);
+								playerPanel[newIndexes[dex]].setCard2(cardSet[cards[2 * i + 1]]);
+							}
+
+							if (userID.equals("admin")) {
+								lblJokbo1.setText(jokbo.getJokboText(cards[2], cards[3]));
+							}
+							imgCard3.setImage(cardSet[cards[0]]);
+							imgCard4.setImage(cardSet[cards[1]]);
+							scoreUser = jokbo.getJokbo(cards[0], cards[1]);
+							scorePlayer = jokbo.getJokbo(cards[2], cards[3]);
+							lblJokbo2.setText(jokbo.getJokboText(cards[0], cards[1]));
+							turn = 1;
+
+							if (scoreUser > scorePlayer) {
+								lose = 2;
+							} else if (scoreUser < scorePlayer) {
+								lose = 1;
+							} else {
 								lose = 0;
 							}
 
+							if (scoreUser == 114) {
+								if (scorePlayer >= 10000 && scorePlayer <= 90000) {
+									lose = 2;
+								} else if (scoreUser >= 10000 && scoreUser <= 90000) {
+									lose = 1;
+								}
+							}
+
 						}
 
-						if (rcvThread.turn == turn) {
+						/*if (rcvThread.turn == turn) {
 
 							betting = rcvThread.betting;
 							total = rcvThread.total;
@@ -480,7 +543,7 @@ public class MainFrame extends JFrame implements ActionListener {
 							btnDie.setEnabled(false);
 							txtPlus.setEnabled(false);
 							btnPlus.setEnabled(false);
-						}
+						}*/
 
 						if (rcvThread.resultFalg) {
 							System.out.println("Client lose = " + rcvThread.lose);
@@ -537,6 +600,9 @@ public class MainFrame extends JFrame implements ActionListener {
 			});
 			playThread.start();
 
+			out.println("/visitors");
+			out.flush();
+
 			while (true) {
 				sendData = reader.readLine(); // 입력한 내용을 한 줄씩 읽어서 저장
 
@@ -583,6 +649,19 @@ public class MainFrame extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String buttonText = e.getActionCommand();
 		switch (buttonText) {
+		case "준비":
+		case "준비 완료":
+			ready = !ready;
+
+			if (ready) {
+				btnCall.setText("준비 완료");
+				out.println("/ready " + userID + " " + "true");
+			} else {
+				btnCall.setText("준비");
+				out.println("/ready " + userID + " " + "false");
+			}
+			break;
+
 		case "콜":
 			if (lose == turn) {
 				out.println("/reset true");

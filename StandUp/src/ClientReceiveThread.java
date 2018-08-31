@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class ClientReceiveThread implements Runnable {
 
@@ -9,9 +10,17 @@ public class ClientReceiveThread implements Runnable {
 	String receiveData;
 	String strCard;
 	String user;
+	String userID;
+
+	String[] names;
+	String[] indexes;
+	String[] cards;
+	
+	String nextPlayer = "";
 
 	int turn;
-	int myTure;
+	int myTurn;
+	int myIndex = 0;
 	int lose;
 	int betting = 0;
 	int total = 0;
@@ -29,10 +38,12 @@ public class ClientReceiveThread implements Runnable {
 	boolean openFlag = false;
 	boolean closeFlag = false;
 	boolean buttonFlag = false;
+	boolean readyFlag = false;
 
-	public ClientReceiveThread(Socket socket, BufferedReader in) {
+	public ClientReceiveThread(Socket socket, BufferedReader in, String userID) {
 		this.socket = socket;
 		this.in = in;
+		this.userID = userID;
 	}
 
 	public boolean exit() {
@@ -74,27 +85,52 @@ public class ClientReceiveThread implements Runnable {
 					xPos = Integer.parseInt(receiveData.split(" ")[1]);
 					yPos = Integer.parseInt(receiveData.split(" ")[2]);
 				}
+				
+				if (tag.equals("/player")) {
+					String result = receiveData.substring(8, receiveData.length());
+					System.out.println("result = " + result);
+					names = result.split(" ");
+				}
+				
+				if (tag.equals("/index")) {
+					String result = receiveData.substring(7, receiveData.length());
+					indexes = result.split(" ");
+					
+					for (int i = 0; i < names.length; i++) {
+						if (names[i].equals(userID)) {
+							myIndex = Integer.parseInt(indexes[i]);
+						}
+					}
+				}
 
 				if (tag.equals("/play")) {
 					playFlag = true;
-					user = receiveData.split(" ")[1] + " " + receiveData.split(" ")[2];
-					System.out.println("/play " + user);
+				}
+				
+				if (tag.equals("/ready")) {
+					readyFlag = Boolean.parseBoolean(receiveData.split(" ")[1]);
 				}
 
 				if (tag.equals("/card")) {
 					cardFlag = true;
 					strCard = receiveData;
+					
+					String card = receiveData.substring(6, receiveData.length());
+					cards = card.split(" ");
+					System.out.println("card set = " + card);
 				}
 
 				if (tag.equals("/turn")) {
-					turn = Integer.parseInt(receiveData.split(" ")[1]);
-					if (receiveData.split(" ")[2].equals("true")) {
+					//turn = Integer.parseInt(receiveData.split(" ")[1]);
+					nextPlayer = receiveData.split(" ")[1];
+					
+					/*if (receiveData.split(" ")[2].equals("true")) {
 						firstFlag = true;
 					} else {
 						firstFlag = false;
 					}
 					betting = Integer.parseInt(receiveData.split(" ")[3]);
-					total = Integer.parseInt(receiveData.split(" ")[4]);
+					total = Integer.parseInt(receiveData.split(" ")[4]);*/
 				}
 
 				if (tag.equals("/result")) {

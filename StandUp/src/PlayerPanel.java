@@ -9,6 +9,7 @@ public class PlayerPanel extends JPanel {
 	JImageView imgCard1, imgCard2;
 	JImageView imgBGJokbo;
 	JLabel2D txtJokbo;
+	JLabel2D txtName;
 	
 	PlayerPanel() {
 		setLayout(null);
@@ -24,6 +25,14 @@ public class PlayerPanel extends JPanel {
 		txtJokbo.setOutlineColor(Color.black);
 		txtJokbo.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
 		add(txtJokbo);
+		
+		txtName = new JLabel2D("", JLabel.CENTER);
+		txtName.setBounds(10, 50, 120, 18);
+		txtName.setFont(font);;
+		txtName.setForeground(Color.white);
+		txtName.setOutlineColor(Color.black);
+		txtName.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+		add(txtName);
 		
 		imgBGJokbo = new JImageView("img/bg_jokbo_text.png");
 		imgBGJokbo.setBounds(90, 90, 120, 20);
@@ -49,5 +58,13 @@ public class PlayerPanel extends JPanel {
 	
 	public void setCard2(String path) {
 		imgCard2.setImage(path);
+	}
+	
+	public void setName(String name) {
+		txtName.setText(name);
+	}
+	
+	public void setJokbo(String jokbo) {
+		txtJokbo.setText(jokbo);
 	}
 }
