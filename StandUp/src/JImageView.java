@@ -75,14 +75,6 @@ public class JImageView extends JLabel {
 		super.setIcon(getImage());
 	}
 
-	/**
-	 * 표시 될 이미지를 정의합니다. 만약 이미지가 없다면 아무 것도 표시되지 않습니다.
-	 * <p>
-	 * 라이브러리 안에 있는 이미지 또는 그렇지 않은 이미지를 알아서 불러옵니다.
-	 * <p>
-	 * 
-	 * @param path 이미지의 경로를 정의합니다.
-	 */
 	public void setImage(String p) {
 		this.mPath = p;
 

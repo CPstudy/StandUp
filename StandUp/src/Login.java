@@ -34,6 +34,10 @@ public class Login extends JFrame implements ActionListener {
 		panelLogin.setLayout(null);
 		panelLogin.setBounds(45, 350, 330, 150);
 		add(panelLogin);
+		
+		JImageView3 imageView = new JImageView3("img/swing_title.png");
+		imageView.setBounds(0, 0, 300, 300);
+		//add(imageView);
 
 		imgTitle = new JImageView("img/swing_title.png");
 		imgTitle.setBounds(0, 30, 454, 294);
