@@ -1,4 +1,7 @@
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
@@ -35,14 +38,24 @@ public class JImageView2 extends JComponent {
 	JImageView2(String p) {
 		setImage(p);
 	}
-	
+
 	@Override
-	public void paint(Graphics g){
-        super.paint(g);
-        Graphics2D g2 = (Graphics2D) g;
-        g2.drawImage(image, 0, 0, width, height, this);
-        
-    }
+	public void paint(Graphics g) {
+		super.paint(g);
+
+		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2 = bi.createGraphics();
+		g2.drawImage(image, 0, 0, width, height, this);
+		g2.dispose();
+		
+		AffineTransform scaleTransform = AffineTransform.getScaleInstance(width, height);
+	    AffineTransformOp bilinearScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+	    
+	    BufferedImage img = bilinearScaleOp.filter(bi, new BufferedImage(width, height, bi.getType()));
+	    
+		g.drawImage(img, 0, 0, width, height, this);
+
+	}
 
 	@Override
 	public void setBounds(int x, int y, int width, int height) {
@@ -50,22 +63,22 @@ public class JImageView2 extends JComponent {
 		this.yPos = y;
 		this.width = width;
 		this.height = height;
-		
+
 		if (autoScale) {
 			this.width = iWidth;
 			this.height = iHeight;
 		}
-		
+
 		super.setBounds(x, y, width, height);
-        image = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-		//repaint();
+		// image = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+		// repaint();
 	}
 
 	@Override
 	public void setSize(int width, int height) {
 		this.width = width;
 		this.height = height;
-		
+
 		repaint();
 	}
 
@@ -94,8 +107,8 @@ public class JImageView2 extends JComponent {
 
 		iWidth = image.getWidth(null);
 		iHeight = image.getHeight(null);
-		
+
 		repaint();
-		
+
 	}
 }

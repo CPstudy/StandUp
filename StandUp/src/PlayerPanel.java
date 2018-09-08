@@ -6,7 +6,7 @@ import javax.swing.*;
 
 public class PlayerPanel extends JPanel {
 	
-	JImageView imgCard1, imgCard2;
+	JImageView2 imgCard1, imgCard2;
 	JImageView imgBGJokbo;
 	JLabel2D txtJokbo;
 	JLabel2D txtName;
@@ -38,11 +38,11 @@ public class PlayerPanel extends JPanel {
 		imgBGJokbo.setBounds(90, 90, 120, 20);
 		add(imgBGJokbo);
 		
-		imgCard1 = new JImageView("img/back.png");
+		imgCard1 = new JImageView2("img/back.png");
 		imgCard1.setBounds(140, 10, 70, 108);
 		add(imgCard1);
 		
-		imgCard2 = new JImageView("img/back.png");
+		imgCard2 = new JImageView2("img/back.png");
 		imgCard2.setBounds(90, 10, 70, 108);
 		add(imgCard2);
 	}

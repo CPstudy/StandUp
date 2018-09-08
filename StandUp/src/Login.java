@@ -14,6 +14,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.plaf.basic.BasicTextFieldUI;
+import javax.swing.plaf.basic.BasicTextUI;
+import javax.swing.plaf.metal.MetalTextFieldUI;
 
 public class Login extends JFrame implements ActionListener {
 
@@ -22,7 +25,7 @@ public class Login extends JFrame implements ActionListener {
 	JTextField txtPW;
 	JButton btnLogin;
 	JPanel panelLogin;
-	JImageView imgTitle;
+	JImageView2 imgTitle;
 	
 	public Login() {
 		setLayout(null);
@@ -35,11 +38,11 @@ public class Login extends JFrame implements ActionListener {
 		panelLogin.setBounds(45, 350, 330, 150);
 		add(panelLogin);
 		
-		JImageView3 imageView = new JImageView3("img/swing_title.png");
+		JImageView imageView = new JImageView("img/swing_title.png");
 		imageView.setBounds(0, 0, 300, 300);
 		//add(imageView);
 
-		imgTitle = new JImageView("img/swing_title.png");
+		imgTitle = new JImageView2("img/swing_title.png");
 		imgTitle.setBounds(0, 30, 454, 294);
 		add(imgTitle);
 
@@ -56,11 +59,13 @@ public class Login extends JFrame implements ActionListener {
 		txtID = new JTextField(10);
 		txtID.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 14));
 		txtID.setBounds(70, 0, 150, 30);
+		txtID.setUI(new StyleTextFieldUI());
 		panelLogin.add(txtID);
 
 		txtPW = new JTextField(10);
 		txtPW.setFont(new Font("¸¼Àº °íµñ", Font.BOLD, 14));
 		txtPW.setBounds(70, 35, 150, 30);
+		txtPW.setUI(new StyleTextFieldUI());
 		txtPW.setText("127.0.0.1");
 		panelLogin.add(txtPW);
 
